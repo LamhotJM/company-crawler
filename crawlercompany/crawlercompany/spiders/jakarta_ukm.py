@@ -28,12 +28,12 @@ class JakartaUKMSpider(scrapy.Spider):
 
     def parse_pagination(self, response):
         url = Selector(response)
-        rootElement = url.xpath(".//body/div/table/tbody")
-        for subRoot in rootElement:
+        mother = url.xpath(".//body/div/table/tbody")
+        for i in mother:
             try:
-                companyName = subRoot.xpath(".//tr/td[2]/b/text()|.//tr/td[2]/a/b/text()").extract()
+                companyName = i.xpath(".//tr/td[2]/b/text()|.//tr/td[2]/a/b/text()").extract()
                 companyName = companyName[0].strip() if companyName else ''
-                companyAddressContact = subRoot.xpath(".//tr/td[2]/div/text()").extract()
+                companyAddressContact = i.xpath(".//tr/td[2]/div/text()").extract()
                 printable = set(string.printable)
                 companyAddress1 = companyAddressContact[0].strip() if companyAddressContact[0] else ''
                 companyAddress1 = filter(lambda x: x in printable, companyAddress1)
@@ -46,7 +46,7 @@ class JakartaUKMSpider(scrapy.Spider):
                 companyAddress = companyAddress1.replace("\n", " ") + ", " + companyAddress2.replace("\n",
                                                                                                      " ") + ", " + companyAddress3.replace(
                     "\n", " ")
-                product = subRoot.xpath(".//tr/td[3]/div/text()").extract()
+                product = i.xpath(".//tr/td[3]/div/text()").extract()
                 product = product[0].strip() if product  else ''
                 item = JakartaUKMItem(companyName=companyName,
                                       companyAddress=" ".join(companyAddress.split()),

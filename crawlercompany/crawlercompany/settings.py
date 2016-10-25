@@ -20,7 +20,7 @@ def id_generator(size=6, chars=string.ascii_uppercase + string.digits):
  return ''.join(random.choice(chars) for _ in range(size))
 
 
-USER_AGENT = "(+lamhot" +id_generator(1000, '2636612356265136793YUIO')
+#USER_AGENT = "(+lamhot" +id_generator(1000, '2636612356265136793YUIO')
 
 JavaScript_Enabled=	"Yes"
 
@@ -41,7 +41,7 @@ RETRY_TIMES = 10
 RETRY_HTTP_CODES = [500, 302,502, 503, 504, 400, 403, 404, 408]
 
 DOWNLOADER_MIDDLEWARES = {
-   'crawlercompany.middlewares.ProxyMiddleware': 543,
+   #'crawlercompany.middlewares.ProxyMiddleware': 543,
 }
 
 http_proxy='http_proxy=http://lamhot:PASSWORD@fr.proxymesh.com:31280'
@@ -56,6 +56,6 @@ PROXIES = [
   {'ip_port': '47.88.6.172:9398','user_pass': ''},
 ]
 
-DOWNLOAD_DELAY =10
+
 
 AUTOTHROTTLE_MAX_DELAY = 60

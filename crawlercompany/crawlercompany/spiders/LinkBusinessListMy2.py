@@ -1,10 +1,11 @@
 from scrapy.selector import Selector
 from scrapy.item import Field, Item
 from scrapy.http import Request
+import time
 import scrapy
 
 
-class CategoryBusinessListMyItem(Item):
+class BusinessListMyItem(Item):
     companyName = Field()
     companyAddress = Field()
     companyPhone = Field()
@@ -12,7 +13,7 @@ class CategoryBusinessListMyItem(Item):
 
 
 class BusinessListMySpider(scrapy.Spider):
-    name = "list-my"
+    name = "list-my2"
     allowed_domains = ["businesslist.my"]
     start_urls = [
         'http://www.businesslist.my/category/general-business',
@@ -28,6 +29,7 @@ class BusinessListMySpider(scrapy.Spider):
             for total in xrange(1, totals):
                 crawlUrl = response.url + "/" + str(total)
                 yield Request(url=crawlUrl, callback=self.ParseAllLinks, dont_filter=True)
+                time.sleep(1)
                 with open('text0.txt', 'a') as f:
                     f.write('{0}\n'.format(crawlUrl))
 
@@ -45,16 +47,19 @@ class BusinessListMySpider(scrapy.Spider):
             with open('text1.txt', 'a') as f:
                 f.write('{0}\n'.format(finalURLPage))
             yield Request(url=finalURLPage, callback=self.ParseDataCompany, dont_filter=True)
+            time.sleep(1)
 
     def ParseDataCompany(self, response):
         url = Selector(response)
+        #try:
         companyName = url.xpath('//*[@id="company_name"]/text()').extract()
         companyName = companyName[0].strip() if companyName else ''
         companyAddress = url.xpath('string(//*[@id="company_details"]/div[2]/div[2])').extract()
         companyAddress = companyAddress[0].strip() if companyAddress else ''
         companyPhone = url.xpath('//*[@id="company_details"]/div[3]/div[2]/text()').extract()
         companyPhone = companyPhone[0].strip() if companyPhone else ''
-        category = 'General Business'
+        category = url.xpath('//*[@id="right"]/div[1]/ul/li[3]/a/span/text()').extract()
+        category = category[0].strip() if category else 'Category Company'
 
         with open('my-company.txt', 'a') as f:
             f.write('{0};{1};{2};{3}\n'.format(category,
@@ -62,5 +67,8 @@ class BusinessListMySpider(scrapy.Spider):
                                                companyAddress,
                                                companyPhone))
 
+
+       # except:
+          #  pass
 
 
