@@ -1,23 +1,20 @@
+import scrapy
+import logging
+import time
+import re
+
 from scrapy.selector import Selector
 from scrapy.item import Field, Item
 from scrapy.http import Request
-import scrapy
-import time
 
-
-class MalayItem(Item):
-    companyName = Field()
-    companyAddress = Field()
-    companyPhone = Field()
-    category = Field()
+from bs4 import BeautifulSoup
 
 
 class StreetDirectorySpider(scrapy.Spider):
-    name = "sd"
+    name = "id_sd"
     allowed_domains = ["streetdirectory.com.my"]
     start_urls = [
         'http://www.streetdirectory.com.my/businessfinder/indonesia/'
-        '',
     ]
 
     def parse(self, response):
@@ -31,8 +28,8 @@ class StreetDirectorySpider(scrapy.Spider):
                 for category in catList:
                     crawlUrl = (proviceLink + category)
                     yield Request(url=crawlUrl, callback=self.ParseSubCat, dont_filter=True)
-                    with open('sd1.txt', 'a') as f:
-                        f.write('{0}\n'.format(crawlUrl))
+                    #with open('sd1.txt', 'a') as f:
+                     #   f.write('{0}\n'.format(crawlUrl))
 
         except:
             pass
@@ -41,42 +38,56 @@ class StreetDirectorySpider(scrapy.Spider):
         url = Selector(response)
         try:
             elements = url.xpath(
-                ".//*[@id='main_page_content']/table/tbody/tr/td/table/tbody/tr/td/table/tbody/tr/td|//tr/td/div/div/div/a")
+                ".//*[@id='main_page_content']/table//tr/td/table//tr/td/table//tr/td|//tr/td/div/div/div/a")
+                 #.//*[@id='main_page_content']/table//tr/td/table//tr/td/table//tr/td|//tr/td/div/div/div/a
+                #                                                        .//*/tr/td[3]/table//tr/td/a
             for element in elements:
                 subCat = element.xpath(".//a/href|.//@href").extract()
                 subCat = subCat[0].strip() if subCat  else ''
-                if subCat == 'javascript:void(0)':
+                if subCat == 'javascript:void(0)' or None:
                     pass
                 else:
-                    yield Request(url=subCat, callback=self.ParseCategory, dont_filter=True)
-                    with open('sd2.txt', 'a') as f:
+                    #yield Request(url=subCat, callback=self.ParseCategory, dont_filter=True)
+                    logging.debug(subCat)
+                    with open('xxxx.txt', 'a') as f:
                         f.write('{0}\n'.format(subCat))
 
         except:
             pass
 
     def ParseCategory(self, response):
-        hxs = Selector(response)
-        pageElement = 1
-        pageNumber = 1
+        # Parse the current page
+        StreetDirectorySpider.ParsePagination(response)
+        time.sleep(2)
 
-        while True:
-            time.sleep(2)
-            text = hxs.xpath('//*[@id="paging"]/div/form/table//tr/td/span/span/span[' + str(
-                pageElement) + ']')
+        current_page = StreetDirectorySpider.extract_current_page_from_link(response.url)
+        logging.debug("Current page %s" % current_page)
+        # Find next page if possible
+        soup = BeautifulSoup(response.text, 'html.parser')
+        next_page_link = soup.find('a', href=True, text=str(current_page + 1))
 
-            urlRequest = response.url + 'All/' + str(pageNumber)
-            yield Request(url=urlRequest, callback=self.ParsePagination, dont_filter=True)
+        if not next_page_link:
+            next_page_link = soup.find('a', href=True, text=re.compile('.*Next.*'))
 
-            pageElement = pageElement + 1
-            pageNumber = pageNumber + 1
-            if pageNumber % 9 == 0:
-                pageElement = 4
+        logging.debug("Next page %s" % next_page_link)
+        if next_page_link:
+            url_request = next_page_link.get('href')
+            logging.debug("Add link to queue %s" % url_request)
+            yield Request(url=url_request, callback=self.parse, dont_filter=True)
 
-            if text.extract() == []:
-                break
+    @staticmethod
+    def extract_current_page_from_link(url):
+        if url.endswith('/'):
+            url = url[0:len(url) - 1]
+            page = url[url.rfind('/') + 1:]
+            try:
+                page_number = int(page)
+            except ValueError:
+                page_number = 1
+        return page_number
 
-    def ParsePagination(self, response):
+    @staticmethod
+    def ParsePagination(response):
         url = Selector(response)
         time.sleep(2)
         elements = url.xpath(".//*[@id='listing_category_content']//tr/td/div/div/table")

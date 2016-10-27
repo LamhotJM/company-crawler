@@ -14,7 +14,7 @@ class StreetDirectorySpider(scrapy.Spider):
     name = "my_sd"
     allowed_domains = ["streetdirectory.com.my"]
     start_urls = [
-        'http://www.streetdirectory.com.my/businessfinder/indonesia/'
+        'http://www.streetdirectory.com.my/businessfinder/malaysia/'
     ]
 
     def parse(self, response):
@@ -99,5 +99,5 @@ class StreetDirectorySpider(scrapy.Spider):
                 './/tr[2]/td/table//tr[@id="listing_tr_category"]/td[3]/a/text()|.//a/b/text()').extract()
             companyCategory = companyCategory[0].strip() if companyCategory else ''
 
-            with open('sd_id_final.txt', 'a') as f:
+            with open('sd_my.txt', 'a') as f:
                 f.write('{0};{1};{2};{3}\n'.format(companyName, companyAdress, companyPhone, companyCategory))

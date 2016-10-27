@@ -11,6 +11,7 @@
 import string
 import random
 BOT_NAME = 'crawlercompany'
+CONCURRENT_REQUESTS = 1
 
 SPIDER_MODULES = ['crawlercompany.spiders']
 NEWSPIDER_MODULE = 'crawlercompany.spiders'

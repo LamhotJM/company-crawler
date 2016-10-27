@@ -8,12 +8,12 @@ def getUniqueItems(iterable):
     return result
 
 
-text_file = open('test2.txt', 'r')
+text_file = open('xxxx.txt', 'r')
 lines = text_file.readlines()
 
 cleanListUrl = getUniqueItems(lines)
 text_file.close()
 
 for cleanUrl in cleanListUrl:
-    with open('clean.txt', 'a') as f:
+    with open('x2.txt', 'a') as f:
         f.write('{0}'.format(cleanUrl))
