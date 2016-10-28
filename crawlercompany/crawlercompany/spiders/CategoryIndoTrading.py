@@ -85,15 +85,11 @@ class IndoTrndingMySpider(scrapy.Spider):
     def parse(self, response):
         url = Selector(response)
         rootElement = url.xpath(".//*[@id='form1']/div/div/div[1]/div/ul/li/div/div/ul/li")
-        # //*[@id="form1"]/div[3]/div[2]/div[3]/div/div[1]/div
-
-        import time
         for subRoot in rootElement:
             url_cat = subRoot.xpath(".//a/@href").extract()
             url_cat = url_cat[0].strip() if url_cat  else ''
             import re
             htmlspaced = re.sub(r" ", "", url_cat)
-
             # yield Request(url=url_cat, callback=self.ParseTotalPage, dont_filter=True)
             with open('test2.txt', 'a') as f:
                 f.write('{0}\n'.format(htmlspaced))
