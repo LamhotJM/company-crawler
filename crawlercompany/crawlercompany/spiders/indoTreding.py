@@ -1,6 +1,4 @@
 from scrapy.selector import Selector
-from scrapy.item import Field, Item
-from scrapy.http import Request
 import scrapy
 
 

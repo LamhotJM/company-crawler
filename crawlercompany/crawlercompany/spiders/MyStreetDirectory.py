@@ -4,7 +4,6 @@ import time
 import re
 
 from scrapy.selector import Selector
-from scrapy.item import Field, Item
 from scrapy.http import Request
 
 from bs4 import BeautifulSoup
@@ -39,27 +38,21 @@ class StreetDirectorySpider(scrapy.Spider):
         try:
             elements = url.xpath(
                 ".//*[@id='main_page_content']/table//tr/td/table//tr/td/table//tr/td|//tr/td/div/div/div/a")
-            #.//*/tr/td[3]/table//tr/td/a
-            #
             for element in elements:
                 subCat = element.xpath(".//@href").extract()
                 subCat = subCat[0].strip() if subCat  else ''
                 logging.debug(subCat)
-               # with open('sd4.txt', 'a') as f:
-                    #f.write('{0}\n'.format(subCat))
                 yield Request(url=subCat, callback=self.ParseCategory, dont_filter=True)
 
         except:
             pass
 
     def ParseCategory(self, response):
-        # Parse the current page
         StreetDirectorySpider.ParsePagination(response)
         time.sleep(2)
 
         current_page = StreetDirectorySpider.extract_current_page_from_link(response.url)
         logging.debug("Current page %s" % current_page)
-        # Find next page if possible
         soup = BeautifulSoup(response.text, 'html.parser')
         next_page_link = soup.find('a', href=True, text=str(current_page + 1))
 
